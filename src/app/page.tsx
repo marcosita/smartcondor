@@ -1,69 +1,191 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import React, { useState } from 'react';
+import { useTenant } from '@/components/common/ThemeProvider';
+import { Header } from '@/components/navigation/Header';
+import { TabNavigation, MainTabType } from '@/components/navigation/TabNavigation';
+import { WeatherExchangeWidget } from '@/components/widgets/WeatherExchangeWidget';
+import { CondoCalendar } from '@/components/condo/CondoCalendar';
+import { BeforeAfterSection } from '@/components/condo/BeforeAfterSection';
+import { ClubSection } from '@/components/club/ClubSection';
+import { CommercialBanner } from '@/components/common/CommercialBanner';
+import { BoardSection } from '@/components/condo/BoardSection';
+import { BottomNav } from '@/components/common/BottomNav';
+import { EmergencyModal } from '@/components/modals/EmergencyModal';
+import { AdvertiseModal } from '@/components/modals/AdvertiseModal';
+import { TenantSelectorModal } from '@/components/navigation/TenantSelectorModal';
+import { AdminDrawer } from '@/components/admin/AdminDrawer';
+import { EventFormModal } from '@/components/admin/EventFormModal';
+import { BeforeAfterFormModal } from '@/components/admin/BeforeAfterFormModal';
+import { ThemeCustomizerModal } from '@/components/theme/ThemeCustomizerModal';
+
+import {
+  MOCK_EVENTS,
+  MOCK_BEFORE_AFTER,
+  ADVANTAGE_FOLDERS,
+  MOCK_PARTNERS,
+  MOCK_BOARD,
+} from '@/data/mockData';
+import { CalendarEvent, BeforeAfterItem } from '@/types/tenant';
+import { Sparkles, Eye, Smartphone, Monitor } from 'lucide-react';
+
+export default function HomePage() {
+  const { tenant } = useTenant();
+
+  // Tab State
+  const [activeTab, setActiveTab] = useState<MainTabType>('condominio');
+
+  // Dynamic Data State (allows adding new events / before & after)
+  const [events, setEvents] = useState<CalendarEvent[]>(MOCK_EVENTS);
+  const [beforeAfterItems, setBeforeAfterItems] = useState<BeforeAfterItem[]>(MOCK_BEFORE_AFTER);
+
+  // Modals & Drawers State
+  const [isEmergencyOpen, setIsEmergencyOpen] = useState(false);
+  const [isAdvertiseOpen, setIsAdvertiseOpen] = useState(false);
+  const [isTenantSelectorOpen, setIsTenantSelectorOpen] = useState(false);
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [isAddEventOpen, setIsAddEventOpen] = useState(false);
+  const [isAddBeforeAfterOpen, setIsAddBeforeAfterOpen] = useState(false);
+  const [isThemeCustomizerOpen, setIsThemeCustomizerOpen] = useState(false);
+
+  // Handlers for adding items via Síndico panel
+  const handleAddEvent = (newEvent: CalendarEvent) => {
+    setEvents((prev) => [newEvent, ...prev]);
+  };
+
+  const handleAddBeforeAfter = (newItem: BeforeAfterItem) => {
+    setBeforeAfterItems((prev) => [newItem, ...prev]);
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="min-h-screen bg-slate-200/70 pb-24 md:py-8 flex flex-col items-center justify-start">
+      {/* SaaS Desktop Presentation Container (Mobile-first frame on desktop) */}
+      <main className="w-full max-w-md bg-white min-h-screen md:min-h-[844px] md:rounded-[44px] shadow-2xl md:border-[10px] md:border-slate-800/90 relative overflow-hidden flex flex-col justify-between">
+        {/* Mobile Status Bar Simulation (visible on desktop) */}
+        <div className="hidden md:flex items-center justify-between px-6 pt-3 pb-1 text-[11px] font-bold text-slate-800 select-none">
+          <span>9:41</span>
+          <div className="w-24 h-4 bg-slate-900 rounded-full mx-auto" />
+          <div className="flex items-center gap-1.5">
+            <span className="text-[9px]">5G</span>
+            <div className="w-4 h-2.5 border border-slate-700 rounded-xs p-0.5">
+              <div className="w-full h-full bg-slate-800 rounded-2xs" />
+            </div>
+          </div>
+        </div>
+
+        {/* Top Header & Branding */}
+        <Header
+          onOpenAdmin={() => setIsAdminOpen(true)}
+          onOpenEmergency={() => setIsEmergencyOpen(true)}
+          onOpenTenantSelector={() => setIsTenantSelectorOpen(true)}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+
+        {/* Main Content Area */}
+        <div className="flex-1 px-4 py-3 overflow-y-auto">
+          {/* Weather & Exchange Rates Live Widget */}
+          <WeatherExchangeWidget />
+
+          {/* Main Segmented Switcher ("CONDOMÍNIO" vs "CLUBE DE VANTAGENS") */}
+          <TabNavigation activeTab={activeTab} onChangeTab={setActiveTab} />
+
+          {/* TAB 1: CONDOMÍNIO (Informativo, Calendário Interativo, Antes e Depois) */}
+          {activeTab === 'condominio' && (
+            <div className="space-y-4 animate-in fade-in duration-200">
+              {/* Módulo 2: Calendário Interativo Outubro 2026 */}
+              <CondoCalendar events={events} />
+
+              {/* Módulo 3: Central de Arquivos Antes e Depois */}
+              <BeforeAfterSection items={beforeAfterItems} />
+
+              {/* Módulo 5: Banner Comercial WhatsApp */}
+              <CommercialBanner onOpenAdvertise={() => setIsAdvertiseOpen(true)} />
+
+              {/* Módulo 6: Rodapé Institucional & Conselho */}
+              <BoardSection board={MOCK_BOARD} />
+            </div>
+          )}
+
+          {/* TAB 2: CLUBE DE VANTAGENS (Grid de Pastas com Folder Tab UI) */}
+          {activeTab === 'clube_vantagens' && (
+            <div className="space-y-4 animate-in fade-in duration-200">
+              {/* Top Banner inside Advantage Club */}
+              <div className="p-3 bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-2xl shadow-sm text-center">
+                <span className="text-[10px] font-black uppercase tracking-wider bg-white/20 px-2 py-0.5 rounded-full inline-block mb-1">
+                  Exclusivo para Moradores
+                </span>
+                <h3 className="font-black text-sm uppercase leading-tight">
+                  Clube de Benefícios & Guia Comunitário
+                </h3>
+                <p className="text-[10.5px] text-emerald-100 mt-0.5">
+                  Toque em uma pasta para acessar ofertas, brindes, sorteios e profissionais do condomínio.
+                </p>
+              </div>
+
+              {/* Módulo 4: Grid das 6 Pastas Virtuais */}
+              <ClubSection
+                folders={ADVANTAGE_FOLDERS}
+                partners={MOCK_PARTNERS}
+                onOpenAdvertise={() => setIsAdvertiseOpen(true)}
+              />
+
+              {/* Módulo 5: Banner Comercial WhatsApp */}
+              <CommercialBanner onOpenAdvertise={() => setIsAdvertiseOpen(true)} />
+
+              {/* Módulo 6: Rodapé Institucional & Conselho */}
+              <BoardSection board={MOCK_BOARD} />
+            </div>
+          )}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+
+        {/* Native Mobile Bottom Navigation */}
+        <BottomNav
+          activeTab={activeTab}
+          onChangeTab={setActiveTab}
+          onOpenAdvertise={() => setIsAdvertiseOpen(true)}
+          onOpenAdmin={() => setIsAdminOpen(true)}
+          onOpenThemeCustomizer={() => setIsThemeCustomizerOpen(true)}
+        />
       </main>
+
+      {/* Global Interactive Modals */}
+      <EmergencyModal
+        isOpen={isEmergencyOpen}
+        onClose={() => setIsEmergencyOpen(false)}
+      />
+
+      <AdvertiseModal
+        isOpen={isAdvertiseOpen}
+        onClose={() => setIsAdvertiseOpen(false)}
+      />
+
+      <TenantSelectorModal
+        isOpen={isTenantSelectorOpen}
+        onClose={() => setIsTenantSelectorOpen(false)}
+      />
+
+      <AdminDrawer
+        isOpen={isAdminOpen}
+        onClose={() => setIsAdminOpen(false)}
+        onOpenAddEvent={() => setIsAddEventOpen(true)}
+        onOpenAddBeforeAfter={() => setIsAddBeforeAfterOpen(true)}
+      />
+
+      <EventFormModal
+        isOpen={isAddEventOpen}
+        onClose={() => setIsAddEventOpen(false)}
+        onAddEvent={handleAddEvent}
+      />
+
+      <BeforeAfterFormModal
+        isOpen={isAddBeforeAfterOpen}
+        onClose={() => setIsAddBeforeAfterOpen(false)}
+        onAddBeforeAfter={handleAddBeforeAfter}
+      />
+
+      <ThemeCustomizerModal
+        isOpen={isThemeCustomizerOpen}
+        onClose={() => setIsThemeCustomizerOpen(false)}
+      />
     </div>
   );
 }
