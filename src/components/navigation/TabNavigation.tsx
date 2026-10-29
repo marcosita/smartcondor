@@ -23,8 +23,8 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({ activeTab, onChang
               : 'text-slate-600 hover:text-slate-900'
           }`}
         >
-          <Building className="w-4 h-4 text-[#0084D1]" />
-          <span>CONDOMÍNIO</span>
+          <Building className="w-4 h-4 text-[#0084D1] shrink-0" />
+          <span>INFORMATIVO INTERNO</span>
           {activeTab === 'condominio' && (
             <span className="w-1.5 h-1.5 rounded-full bg-[#0084D1] ml-0.5" />
           )}
