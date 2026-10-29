@@ -108,7 +108,9 @@ location ^~ /_next/ {
     proxy_set_header Upgrade \$http_upgrade;
     proxy_set_header Connection 'upgrade';
     proxy_set_header Host \$host;
-    proxy_cache_bypass \$http_upgrade;
+    proxy_cache off;
+    proxy_cache_bypass 1;
+    proxy_no_cache 1;
 }
 
 location / {
@@ -120,11 +122,14 @@ location / {
     proxy_set_header X-Real-IP \$remote_addr;
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto \$scheme;
-    proxy_cache_bypass \$http_upgrade;
+    proxy_cache off;
+    proxy_cache_bypass 1;
+    proxy_no_cache 1;
 }
 NGINX_CONF
 
-echo '🔄 Recarregando Nginx...'
+echo '🧹 Limpando cache do Nginx e recarregando...'
+rm -rf /www/server/nginx/proxy_cache_dir/*
 nginx -t && (nginx -s reload || /etc/init.d/nginx reload)
 
 echo '🚀 Gerenciando processo PM2 $APP_NAME...'
