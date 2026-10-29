@@ -128,8 +128,9 @@ echo '🔄 Recarregando Nginx...'
 nginx -t && (nginx -s reload || /etc/init.d/nginx reload)
 
 echo '🚀 Gerenciando processo PM2 $APP_NAME...'
+rm -f $REMOTE_DIR/index.html
 if pm2 describe $APP_NAME > /dev/null 2>&1; then
-  pm2 reload ecosystem.config.cjs --update-env
+  pm2 restart $APP_NAME --update-env
 else
   pm2 start ecosystem.config.cjs
 fi
